@@ -11,5 +11,5 @@ before_install: true
 install: true
 before_script: true
 script:
-  - docker build --build-arg USER=${USER} --build-arg PASSWORD=${PASSWORD} --build-arg REV=${TRAVIS_COMMIT} -t ${IMAGE} -f docker/Dockerfile .
+  - docker build --build-arg USER=${USER} --build-arg PASSWORD=${PASSWORD} --build-arg REV=${TRAVIS_COMMIT} -t ${IMAGE} -f docker/Dockerfile docker/
   - docker push ${IMAGE}
