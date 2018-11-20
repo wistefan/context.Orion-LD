@@ -1,4 +1,4 @@
-if: type IN (push)
+if: type not IN (pull_request)
 dist: trusty
 sudo: false
 language: minimal
