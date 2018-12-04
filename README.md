@@ -10,7 +10,7 @@
 
 (The content of this repo will eventually be merged in the main Orion development line)
 
-For a description of what NGSI-LD is please check [this](https://github.com/fiware/NGSI-LD_Wrapper/README.md). 
+For a description of what NGSI-LD is please check [this](https://github.com/Fiware/NGSI-LD_Wrapper/blob/master/README.md). 
 
 If you want to start testing NGSI-LD just use Docker
 
