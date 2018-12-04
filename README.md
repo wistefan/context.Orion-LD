@@ -21,6 +21,7 @@ Examples of NGSI-LD can found at [ETSI](https://forge.etsi.org/gitlab/NGSI-LD/NG
 
 See also [OpenAPI Specification of NGSI-LD](https://forge.etsi.org/swagger/ui/?url=https://forge.etsi.org/gitlab/NGSI-LD/NGSI-LD/raw/master/spec/updated/full_api.json)
 
+A Test Suite for NGSI-LD can be found [here](https://github.com/fiware/NGSI-LD_Tests). 
 -- 
 
 The content below corresponds to the official [FIWARE Orion Project](https://github.com/telefonicaid/fiware-orion). 
