@@ -1,5 +1,13 @@
 # <a name="top"></a>Orion Context Broker (Linked Data Extensions)
 
+<!-- Documentation badge line is processed by release.sh. Thus, if the structure of the URL changes,
+     release.sh needs to be changed also -->
+
+[![License badge](https://img.shields.io/badge/license-AGPL-blue.svg)](https://opensource.org/licenses/AGPL-3.0)
+[![Documentation badge](https://readthedocs.org/projects/fiware-orion/badge/?version=latest)](http://fiware-orion.readthedocs.io/en/latest/?badge=latest)
+[![Docker badge](https://img.shields.io/docker/pulls/fiware/orion-ld.svg)](https://hub.docker.com/r/fiware/orion-ld/)
+[![Support badge]( https://img.shields.io/badge/support-sof-yellowgreen.svg)](http://stackoverflow.com/questions/tagged/fiware-orion)
+
 (The content of this repo will eventually be merged in the main Orion development line)
 
 For a description of what NGSI-LD is please check [this](https://github.com/fiware/NGSI-LD_Wrapper). 
@@ -12,13 +20,7 @@ Examples of NGSI-LD can found at [ETSI](https://forge.etsi.org/gitlab/NGSI-LD/NG
 
 See also [OpenAPI Specification of NGSI-LD](https://forge.etsi.org/swagger/ui/?url=https://forge.etsi.org/gitlab/NGSI-LD/NGSI-LD/raw/master/spec/updated/full_api.json)
 
-<!-- Documentation badge line is processed by release.sh. Thus, if the structure of the URL changes,
-     release.sh needs to be changed also -->
-
-[![License badge](https://img.shields.io/badge/license-AGPL-blue.svg)](https://opensource.org/licenses/AGPL-3.0)
-[![Documentation badge](https://readthedocs.org/projects/fiware-orion/badge/?version=latest)](http://fiware-orion.readthedocs.io/en/latest/?badge=latest)
-[![Docker badge](https://img.shields.io/docker/pulls/fiware/orion-ld.svg)](https://hub.docker.com/r/fiware/orion-ld/)
-[![Support badge]( https://img.shields.io/badge/support-sof-yellowgreen.svg)](http://stackoverflow.com/questions/tagged/fiware-orion)
+-- 
 
 The content below corresponds to the official [FIWARE Orion Project](https://github.com/telefonicaid/fiware-orion). 
 
