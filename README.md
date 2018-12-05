@@ -13,7 +13,8 @@
 
 For a description of what NGSI-LD is please check [this](https://github.com/Fiware/NGSI-LD_Wrapper/blob/master/README.md). 
 
-This presentation from FIWARE Summit Malaga 2018 is also of interest: https://www.slideshare.net/FI-WARE/fiware-global-summit-ngsild-ngsi-with-linked-data
+This presentation from FIWARE Summit Malaga 2018 is also of interest: 
+https://www.slideshare.net/FI-WARE/fiware-global-summit-ngsild-ngsi-with-linked-data
 
 If you want to start testing NGSI-LD just use Docker
 
