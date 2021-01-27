@@ -1,4 +1,5 @@
-FROM fiware/orion-ld-base
+ARG  BASE_IMAGE_VERSION=latest
+FROM fiware/orion-ld-base:${BASE_IMAGE_VERSION}
 
 ARG PATH_TO_SRC='/opt/orion/'
 

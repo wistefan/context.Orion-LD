@@ -6,8 +6,53 @@ on:
 env:
   IMAGE_NAME: localhost:5000/orion-ld-test:latest
   IGNORE_TEST: '0706_direct_https_notifications/direct_https_notifications.test 0706_direct_https_notifications/direct_https_notifications_no_accept_selfsigned.test 2015_notification_templates/notification_templates_cache_refresh.test 0000_ipv6_support/ipv4_ipv6_both.test'
+  IMAGE_NAME_BASE: fiware/orion-ld-base
 
 jobs:
+  get-version:
+    on:
+      push:
+        branches:
+          - 'release/**'
+          -
+    runs-on: ubuntu-18.04
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+
+      - uses: jungwinter/split@v1
+        id: split
+        with:
+          msg: ${{ steps.extract_branch.outputs.branch }}
+          seperator: /
+
+      - name: Set up QEMU
+          uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME_BASE }}:${{ steps.split.outputs._1 }}
+          file: docker/Dockerfile-base
+
+
   functional-part1:
     runs-on: ubuntu-18.04
 
@@ -36,6 +81,22 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+
+      - uses: jungwinter/split@v1
+        id: split
+        with:
+          msg: ${{ steps.extract_branch.outputs.branch }}
+          seperator: /
+
+      - name: Decide tag
+        id: tag
+        run: |
+          ::set-output name=tag::if [ ${{ steps.split.outputs._0 }} -eq "release" ] ; then${{ steps.split.outputs._1 }}; else "latest" ; fi
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 
@@ -50,6 +111,8 @@ jobs:
           push: true
           file: docker/Dockerfile-test
           tags: ${{ env.IMAGE_NAME }}
+          build-args: |
+            BASE_IMAGE_VERSION=${{ steps.tag.tag }}
 
       - name: Run functional test
         run: |
@@ -83,6 +146,22 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+
+      - uses: jungwinter/split@v1
+        id: split
+        with:
+          msg: ${{ steps.extract_branch.outputs.branch }}
+          seperator: /
+
+      - name: Decide tag
+        id: tag
+        run: |
+          ::set-output name=tag::if [ ${{ steps.split.outputs._0 }} -eq "release" ] ; then${{ steps.split.outputs._1 }}; else "latest" ; fi
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 
@@ -97,6 +176,8 @@ jobs:
           push: true
           file: docker/Dockerfile-test
           tags: ${{ env.IMAGE_NAME }}
+          build-args: |
+            BASE_IMAGE_VERSION=${{ steps.tag.tag }}
 
       - name: Run functional test
         run: |
@@ -130,6 +211,22 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+
+      - uses: jungwinter/split@v1
+        id: split
+        with:
+          msg: ${{ steps.extract_branch.outputs.branch }}
+          seperator: /
+
+      - name: Decide tag
+        id: tag
+        run: |
+          ::set-output name=tag::if [ ${{ steps.split.outputs._0 }} -eq "release" ] ; then${{ steps.split.outputs._1 }}; else "latest" ; fi
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 
@@ -144,6 +241,8 @@ jobs:
           push: true
           file: docker/Dockerfile-test
           tags: ${{ env.IMAGE_NAME }}
+          build-args: |
+            BASE_IMAGE_VERSION=${{ steps.tag.tag }}
 
       - name: Run functional test
         run: |
@@ -177,6 +276,22 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+
+      - uses: jungwinter/split@v1
+        id: split
+        with:
+          msg: ${{ steps.extract_branch.outputs.branch }}
+          seperator: /
+
+      - name: Decide tag
+        id: tag
+        run: |
+          ::set-output name=tag::if [ ${{ steps.split.outputs._0 }} -eq "release" ] ; then${{ steps.split.outputs._1 }}; else "latest" ; fi
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 
@@ -191,6 +306,8 @@ jobs:
           push: true
           file: docker/Dockerfile-test
           tags: ${{ env.IMAGE_NAME }}
+          build-args: |
+            BASE_IMAGE_VERSION=${{ steps.tag.tag }}
 
       - name: Run functional test
         run: |
