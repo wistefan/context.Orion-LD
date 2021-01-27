@@ -91,7 +91,7 @@ jobs:
       - name: Decide tag
         id: tag
         run: |
-          ::set-output name=tag::$(if [ "${{ steps.split.outputs._0 }}" -eq "release" ] ; then echo "${{ steps.split.outputs._1 }}" ; else echo "latest" ; fi)
+          ::set-output name=tag::$(if [ "${{ steps.split.outputs._0 }}" -eq "release" ] ; then ${{ steps.split.outputs._1 }} ; else latest ; fi)
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
