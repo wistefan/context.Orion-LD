@@ -9,7 +9,7 @@ env:
   IMAGE_NAME_BASE: fiware/orion-ld-base
 
 jobs:
-  get-version:
+  prepare-baseimage:
 
     runs-on: ubuntu-18.04
     if: contains(github.ref, 'release')
@@ -91,7 +91,7 @@ jobs:
       - name: Decide tag
         id: tag
         run: |
-          ::set-output name=tag::if [ ${{ steps.split.outputs._0 }} -eq "release" ] ; then${{ steps.split.outputs._1 }}; else "latest" ; fi
+          ::set-output name=tag::if [ ${{ steps.split.outputs._0 }} -eq "release" ] ; then '${{ steps.split.outputs._1 }}'; else 'latest' ; fi
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -156,7 +156,7 @@ jobs:
       - name: Decide tag
         id: tag
         run: |
-          ::set-output name=tag::if [ ${{ steps.split.outputs._0 }} -eq "release" ] ; then${{ steps.split.outputs._1 }}; else "latest" ; fi
+          ::set-output name=tag::if [ ${{ steps.split.outputs._0 }} -eq "release" ] ; then '${{ steps.split.outputs._1 }}'; else 'latest' ; fi
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -221,7 +221,7 @@ jobs:
       - name: Decide tag
         id: tag
         run: |
-          ::set-output name=tag::if [ ${{ steps.split.outputs._0 }} -eq "release" ] ; then${{ steps.split.outputs._1 }}; else "latest" ; fi
+          ::set-output name=tag::if [ ${{ steps.split.outputs._0 }} -eq "release" ] ; then '${{ steps.split.outputs._1 }}'; else 'latest' ; fi
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -286,7 +286,7 @@ jobs:
       - name: Decide tag
         id: tag
         run: |
-          ::set-output name=tag::if [ ${{ steps.split.outputs._0 }} -eq "release" ] ; then${{ steps.split.outputs._1 }}; else "latest" ; fi
+          ::set-output name=tag::if [ ${{ steps.split.outputs._0 }} -eq "release" ] ; then '${{ steps.split.outputs._1 }}'; else 'latest' ; fi
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
