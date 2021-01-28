@@ -108,7 +108,7 @@ jobs:
           file: docker/Dockerfile-test
           tags: ${{ env.IMAGE_NAME }}
           build-args: |
-            BASE_IMAGE_VERSION=${{ steps.tag.tag }}
+            BASE_IMAGE_VERSION=${{ steps.tag.outputs.tag }}
 
       - name: Run functional test
         run: |
@@ -156,7 +156,7 @@ jobs:
       - name: Decide tag
         id: tag
         run: |
-          ::set-output name=tag::if [ ${{ steps.split.outputs._0 }} -eq "release" ] ; then echo '${{ steps.split.outputs._1 }}' ; else echo 'latest' ; fi
+          echo "::set-output name=tag::$(if [ "${{ steps.split.outputs._0 }}" = "release" ] ; then echo "${{ steps.split.outputs._1 }}" ; else echo "latest" ; fi)"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -173,7 +173,7 @@ jobs:
           file: docker/Dockerfile-test
           tags: ${{ env.IMAGE_NAME }}
           build-args: |
-            BASE_IMAGE_VERSION=${{ steps.tag.tag }}
+            BASE_IMAGE_VERSION=${{ steps.tag.outputs.tag }}
 
       - name: Run functional test
         run: |
@@ -221,7 +221,7 @@ jobs:
       - name: Decide tag
         id: tag
         run: |
-          ::set-output name=tag::if [ ${{ steps.split.outputs._0 }} -eq "release" ] ; then echo '${{ steps.split.outputs._1 }}' ; else echo 'latest' ; fi
+          echo "::set-output name=tag::$(if [ "${{ steps.split.outputs._0 }}" = "release" ] ; then echo "${{ steps.split.outputs._1 }}" ; else echo "latest" ; fi)"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -238,7 +238,7 @@ jobs:
           file: docker/Dockerfile-test
           tags: ${{ env.IMAGE_NAME }}
           build-args: |
-            BASE_IMAGE_VERSION=${{ steps.tag.tag }}
+            BASE_IMAGE_VERSION=${{ steps.tag.outputs.tag }}
 
       - name: Run functional test
         run: |
@@ -286,7 +286,7 @@ jobs:
       - name: Decide tag
         id: tag
         run: |
-          ::set-output name=tag::if [ ${{ steps.split.outputs._0 }} -eq "release" ] ; then echo '${{ steps.split.outputs._1 }}' ; else echo 'latest' ; fi
+          echo "::set-output name=tag::$(if [ "${{ steps.split.outputs._0 }}" = "release" ] ; then echo "${{ steps.split.outputs._1 }}" ; else echo "latest" ; fi)"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -303,7 +303,7 @@ jobs:
           file: docker/Dockerfile-test
           tags: ${{ env.IMAGE_NAME }}
           build-args: |
-            BASE_IMAGE_VERSION=${{ steps.tag.tag }}
+            BASE_IMAGE_VERSION=${{ steps.tag.outputs.tag }}
 
       - name: Run functional test
         run: |
