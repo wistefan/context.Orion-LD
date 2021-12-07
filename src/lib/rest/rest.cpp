@@ -820,8 +820,8 @@ static void requestCompleted
   *con_cls = NULL;
 
   ++reqNo;
-  if (reqNo % 1000 == 0)
-    LM_TMP(("reqNo: %d", reqNo));
+  //  if (reqNo % 1000 == 0)
+  //    LM_TMP(("reqNo: %d", reqNo));
 
 #ifdef REQUEST_PERFORMANCE
   if (reqNo % 100 == 0)

@@ -26,17 +26,10 @@ Note that the **NGSI-LD**
 changing document (version 1.5 as of June 2021), with features being continuously added at a pace such that it is not
 possible to align a context broker to the cutting edge specification for **NGSI-LD** implementation.
 
-> The latest release of Orion-LD is ([Beta 3](https://github.com/FIWARE/context.Orion-LD/releases/tag/0.8.0) of
-> June 2021) and it contains the following additions with respect to
-> [Beta 1 (initially alpha-6)](https://github.com/FIWARE/context.Orion-LD/releases/tag/v0.6.1-alpha):
 >
-> -   Query responses and notifications in GeoJSON format, if so requested (Accept: application/geo+json)
-> -   Performance improvements
-> -   Bug fixes
-> -   Working and tested implementation of the optional interface for Temporal Representation of Entities (TRoE - feel
->     free to use, but at your own risk ;-))
+> The latest release of Orion-LD is [1.0.0](https://github.com/FIWARE/context.Orion-LD/releases/tag/v1.0.0) of Dec 2021.
+> A full description of what this first official release of Orion-LD contains is found [here](doc/manuals-ld/v1.0.0.md)
 >
-> _The plan is to merge Orion-LD back into the main branch of the original Orion at some point._
 
 This project is part of [FIWARE](https://www.fiware.org/). For more information check the FIWARE Catalogue entry for
 [Core Context](https://github.com/Fiware/catalogue/tree/master/core).
