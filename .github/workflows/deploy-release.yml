@@ -33,7 +33,7 @@ jobs:
         with:
           image: ${{ env.IMAGE_NAME }}
           tags: ${{ steps.split.outputs._1 }}
-          containerfiles: |
+          dockerfiles: |
             ./docker/Dockerfile-ubi
 
       - name: Push To certification registry
