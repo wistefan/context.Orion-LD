@@ -7,6 +7,9 @@ on:
   # or on a manual trigger
   workflow_dispatch:
 
+env:
+  IMAGE_NAME: localhost:5000/orion-ld-test:latest
+
 jobs:
   build-test-image:
     runs-on: ubuntu-latest
