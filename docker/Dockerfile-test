@@ -3,6 +3,7 @@ FROM fiware/orion-ld-base
 ARG PATH_TO_SRC='/opt/orion/'
 ENV LD_LIBRARY_PATH=/opt/paho.mqtt.c/build/output:/usr/local/lib64
 
+
 RUN  wget http://downloads.sourceforge.net/ltp/lcov-1.14.tar.gz
 RUN tar -xf lcov-1.14.tar.gz
 WORKDIR lcov-1.14
@@ -11,6 +12,7 @@ WORKDIR ${PATH_TO_SRC}
 
 RUN  yum install -y gnupg
 
+RUN yum install --nogpgcheck -y valgrind
 RUN yum install -y https://repo.mongodb.org/yum/redhat/8Server/mongodb-org/4.4/x86_64/RPMS/mongodb-database-tools-100.4.1.x86_64.rpm
 RUN yum install -y https://repo.mongodb.org/yum/redhat/8Server/mongodb-org/4.4/x86_64/RPMS/mongodb-org-database-tools-extra-4.4.9-1.el8.x86_64.rpm
 RUN yum install -y https://repo.mongodb.org/yum/redhat/8Server/mongodb-org/4.4/x86_64/RPMS/mongodb-org-tools-4.4.9-1.el8.x86_64.rpm
@@ -48,6 +50,5 @@ RUN yum -y install hostname
 
 COPY . ${PATH_TO_SRC}
 WORKDIR ${PATH_TO_SRC}
-
 
 ENTRYPOINT ["docker/build.sh"]
