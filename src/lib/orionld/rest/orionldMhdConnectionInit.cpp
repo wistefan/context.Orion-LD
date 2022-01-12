@@ -48,6 +48,7 @@ extern "C"
 #include "orionld/rest/orionldServiceLookup.h"                   // orionldServiceLookup
 #include "orionld/rest/temporaryErrorPayloads.h"                 // Temporary Error Payloads
 #include "orionld/rest/OrionLdRestService.h"                     // ORIONLD_URIPARAM_LIMIT, ...
+#include "orionld/rest/orionldHttpHeaderReceive.h"               // orionldHttpHeaderReceive
 #include "orionld/rest/orionldMhdConnectionInit.h"               // Own interface
 
 
@@ -219,127 +220,6 @@ static void optionsParse(const char* options)
 
     ++cP;
   }
-}
-
-
-
-// -----------------------------------------------------------------------------
-//
-// strSplit -
-//
-static int strSplit(char* s, char delimiter, char** outV, int outMaxItems)
-{
-  if (s == NULL)
-    return 0;
-
-  if (*s == 0)
-    return 0;
-
-  int   outIx = 0;
-  char* start = s;
-
-  //
-  // Loop over 's':
-  // - Search for the delimiter
-  // - zero-terminate
-  // - assign and
-  // - continue
-  //
-  while (*s != 0)
-  {
-    if (*s == delimiter)
-    {
-      *s = 0;
-      outV[outIx] = wsStrip(start);
-      start = &s[1];
-
-      // Check that the scope starts with a slash, etc ...
-      // if (scopeCheck(outV[outIx]) == false) ...
-
-      if (++outIx > outMaxItems)
-        return -1;
-    }
-
-    ++s;
-  }
-
-  outV[outIx] = wsStrip(start);
-
-  ++outIx;
-
-  return outIx;
-}
-
-
-
-/* ****************************************************************************
-*
-* contentTypeParse -
-*/
-MimeType contentTypeParse(const char* contentType, char** charsetP)
-{
-  char* s;
-  char* cP = (char*) contentType;
-
-  if ((s = strstr(cP, ";")) != NULL)
-  {
-    *s = 0;
-    ++s;
-    s = wsStrip(s);
-
-    if ((charsetP != NULL) && (strncmp(s, "charset=", 8) == 0))
-      *charsetP = &s[8];
-  }
-
-  cP = wsStrip(cP);
-
-  if      (strcmp(cP, "*/*") == 0)                          return JSON;
-  else if (strcmp(cP, "text/json") == 0)                    return JSON;
-  else if (strcmp(cP, "application/json") == 0)             return JSON;
-  else if (strcmp(cP, "application/ld+json") == 0)          return JSONLD;
-  else if (strcmp(cP, "application/geo+json") == 0)         return GEOJSON;
-  else if (strcmp(cP, "application/html") == 0)             return HTML;
-  else if (strcmp(cP, "application/merge-patch+json") == 0) return MERGE_PATCH_JSON;
-  else if (strcmp(cP, "text/plain") == 0)                   return TEXT;
-  else
-    orionldState.in.invalidContentType = cP;
-
-  return JSON;
-}
-
-
-
-// -----------------------------------------------------------------------------
-//
-// orionldHttpHeaderGet -
-//
-static MHD_Result orionldHttpHeaderGet(void* cbDataP, MHD_ValueKind kind, const char* key, const char* value)
-{
-  LM_TMP(("KZ: Header '%s' = '%s', orionldState.httpStatusCode == %d", key, value, orionldState.httpStatusCode));
-  if (strcasecmp(key, "NGSILD-Scope") == 0)
-  {
-    orionldState.scopes = strSplit((char*) value, ',', orionldState.scopeV, K_VEC_SIZE(orionldState.scopeV));
-    if (orionldState.scopes == -1)
-    {
-      LM_W(("Bad Input (too many scopes)"));
-      orionldErrorResponseCreate(OrionldBadRequestData, "Bad value for HTTP header /NGSILD-Scope/", value);
-      orionldState.httpStatusCode = 400;
-    }
-  }
-  else if (strcasecmp(key, "Ngsiv2-AttrsFormat") == 0)  // FIXME: This header name needs to change for NGSI-LD
-    orionldState.attrsFormat = (char*) value;
-  else if (strcasecmp(key, "X-Auth-Token") == 0)
-    orionldState.xAuthToken = (char*) value;
-  else if (strcasecmp(key, "Fiware-Correlator") == 0)
-    orionldState.correlator = (char*) value;
-  else if (strcasecmp(key, "Content-Type") == 0)
-    orionldState.in.contentType = contentTypeParse(value, NULL);
-  else if (strcasecmp(key, "Content-Length") == 0)
-    orionldState.in.contentLength = atoi(value);
-
-  LM_TMP(("KZ: Header '%s' = '%s', orionldState.httpStatusCode == %d", key, value, orionldState.httpStatusCode));
-
-  return MHD_YES;
 }
 
 
@@ -862,12 +742,12 @@ MHD_Result orionldMhdConnectionInit
   LM_TMP(("KZ: orionldState.httpStatusCode == %d", orionldState.httpStatusCode));
   //
   // Get HTTP Headers
-  // First we call the Orion-LD function 'orionldHttpHeaderGet' and then the Orion/NGSIv2 function 'httpHeaderGet'
+  // First we call the Orion-LD function 'orionldHttpHeaderReceive' and then the Orion/NGSIv2 function 'httpHeaderGet'
   // Any header cannot be part of both functions.
-  // The idea is to move all headers from httpHeaderGet to orionldHttpHeaderGet
+  // The idea is to move all headers from httpHeaderGet to orionldHttpHeaderReceive
   //
   LM_TMP(("KZ: orionldState.httpStatusCode == %d", orionldState.httpStatusCode));
-  MHD_get_connection_values(connection, MHD_HEADER_KIND, orionldHttpHeaderGet, NULL);
+  MHD_get_connection_values(connection, MHD_HEADER_KIND, orionldHttpHeaderReceive, NULL);
   LM_TMP(("KZ: orionldState.httpStatusCode == %d", orionldState.httpStatusCode));
   MHD_get_connection_values(connection, MHD_HEADER_KIND, httpHeaderGet, ciP);
   LM_TMP(("KZ: orionldState.httpStatusCode == %d", orionldState.httpStatusCode));

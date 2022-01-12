@@ -27,6 +27,7 @@ SET (SOURCES
     orionldServiceInit.cpp
     orionldServiceLookup.cpp
     orionldServiceInitPresent.cpp
+    orionldHttpHeaderReceive.cpp
     temporaryErrorPayloads.cpp
     uriParamName.cpp
 )

@@ -214,6 +214,19 @@ typedef struct OrionldStateIn
   MimeType  contentType;
   char*     invalidContentType;
   int       contentLength;
+  char*     attrsFormat;
+  char*     xAuthToken;
+  char*     correlator;
+  char*     expect;
+  char*     userAgent;
+  char*     host;
+  char*     connection;
+  char*     origin;
+  char*     prefer;
+  char*     xauthToken;
+  char*     authorization;
+  char*     realIp;
+  char*     xForwardedFor;
 } OrionldStateIn;
 
 // -----------------------------------------------------------------------------
