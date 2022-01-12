@@ -212,6 +212,8 @@ typedef struct OrionldStateIn
 {
   // Incoming HTTP headers
   MimeType  contentType;
+  char*     invalidContentType;
+  int       contentLength;
 } OrionldStateIn;
 
 // -----------------------------------------------------------------------------

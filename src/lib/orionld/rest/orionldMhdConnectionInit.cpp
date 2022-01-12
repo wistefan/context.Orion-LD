@@ -293,13 +293,16 @@ MimeType contentTypeParse(const char* contentType, char** charsetP)
 
   cP = wsStrip(cP);
 
-  if      (strcmp(cP, "*/*") == 0)                  return JSON;
-  else if (strcmp(cP, "text/json") == 0)            return JSON;
-  else if (strcmp(cP, "application/json") == 0)     return JSON;
-  else if (strcmp(cP, "application/ld+json") == 0)  return JSONLD;
-  else if (strcmp(cP, "application/geo+json") == 0) return GEOJSON;
-  else if (strcmp(cP, "application/html") == 0)     return HTML;
-  else if (strcmp(cP, "text/plain") == 0)           return TEXT;
+  if      (strcmp(cP, "*/*") == 0)                          return JSON;
+  else if (strcmp(cP, "text/json") == 0)                    return JSON;
+  else if (strcmp(cP, "application/json") == 0)             return JSON;
+  else if (strcmp(cP, "application/ld+json") == 0)          return JSONLD;
+  else if (strcmp(cP, "application/geo+json") == 0)         return GEOJSON;
+  else if (strcmp(cP, "application/html") == 0)             return HTML;
+  else if (strcmp(cP, "application/merge-patch+json") == 0) return MERGE_PATCH_JSON;
+  else if (strcmp(cP, "text/plain") == 0)                   return TEXT;
+  else
+    orionldState.in.invalidContentType = cP;
 
   return JSON;
 }
@@ -313,7 +316,7 @@ MimeType contentTypeParse(const char* contentType, char** charsetP)
 static MHD_Result orionldHttpHeaderGet(void* cbDataP, MHD_ValueKind kind, const char* key, const char* value)
 {
   LM_TMP(("KZ: Header '%s' = '%s', orionldState.httpStatusCode == %d", key, value, orionldState.httpStatusCode));
-  if (strcmp(key, "NGSILD-Scope") == 0)
+  if (strcasecmp(key, "NGSILD-Scope") == 0)
   {
     orionldState.scopes = strSplit((char*) value, ',', orionldState.scopeV, K_VEC_SIZE(orionldState.scopeV));
     if (orionldState.scopes == -1)
@@ -323,22 +326,17 @@ static MHD_Result orionldHttpHeaderGet(void* cbDataP, MHD_ValueKind kind, const 
       orionldState.httpStatusCode = 400;
     }
   }
-  else if (strcmp(key, "Ngsiv2-AttrsFormat") == 0)  // FIXME: This header name needs to change for NGSI-LD
-  {
+  else if (strcasecmp(key, "Ngsiv2-AttrsFormat") == 0)  // FIXME: This header name needs to change for NGSI-LD
     orionldState.attrsFormat = (char*) value;
-  }
-  else if (strcmp(key, "X-Auth-Token") == 0)
-  {
+  else if (strcasecmp(key, "X-Auth-Token") == 0)
     orionldState.xAuthToken = (char*) value;
-  }
-  else if (strcmp(key, "Fiware-Correlator") == 0)
-  {
+  else if (strcasecmp(key, "Fiware-Correlator") == 0)
     orionldState.correlator = (char*) value;
-  }
-  else if (strcmp(key, "Content-Type") == 0)
-  {
+  else if (strcasecmp(key, "Content-Type") == 0)
     orionldState.in.contentType = contentTypeParse(value, NULL);
-  }
+  else if (strcasecmp(key, "Content-Length") == 0)
+    orionldState.in.contentLength = atoi(value);
+
   LM_TMP(("KZ: Header '%s' = '%s', orionldState.httpStatusCode == %d", key, value, orionldState.httpStatusCode));
 
   return MHD_YES;
