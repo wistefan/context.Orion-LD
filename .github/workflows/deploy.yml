@@ -13,8 +13,6 @@ env:
   IMAGE_ORG: fiware
   IMAGE_NAME: orion-ld
   IMAGE_TAG_DEBUG: debug
-  GITHUB_ACTIONS_BOT_EMAIL: github-actions[bot]@users.noreply.github.com
-  GITHUB_ACTIONS_BOT_NAME: github-actions[bot]
   IMAGE_TAG_PRE: PRE-${{ github.run_number }}
 
 jobs:
@@ -22,7 +20,7 @@ jobs:
   # generate pre-release version, based on the last release
   generate-version:
 
-    if: github.event.pull_request.user.name != '${{ env.GITHUB_ACTIONS_BOT_NAME }}'
+    if: github.event.pull_request.user.name != 'github-actions[bot]'
 
     runs-on: ubuntu-latest
     outputs:
@@ -61,8 +59,8 @@ jobs:
 
       - name: Commit files
         run: |
-          git config --local user.email "${{ env.GITHUB_ACTIONS_BOT_EMAIL }}"
-          git config --local user.name "${{ env.GITHUB_ACTIONS_BOT_NAME }}"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           git commit -m "Update release version" -a
 
       - name: Push changes

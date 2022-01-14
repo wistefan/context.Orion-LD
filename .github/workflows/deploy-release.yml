@@ -8,15 +8,12 @@ on:
 env:
   IMAGE_ORG: fiware
   IMAGE_NAME: orion-ld
-  GITHUB_ACTIONS_BOT_EMAIL: github-actions[bot]@users.noreply.github.com
-  GITHUB_ACTIONS_BOT_NAME: github-actions[bot]
-
 
 jobs:
   # generate version, based on the last pr
   generate-version:
 
-    if: github.event.push.user.name != '${{ env.GITHUB_ACTIONS_BOT_NAME }}'
+    if: github.event.pull_request.user.name != 'github-actions[bot]'
 
     runs-on: ubuntu-latest
     outputs:
