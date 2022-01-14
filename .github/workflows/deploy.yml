@@ -71,12 +71,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.head_ref }}
 
-      - name: read release notes
-        id: release-notes
-        run: |
-          echo "Release notes are: ${{ steps.pr.outputs.body }}"
-          echo "::set-output name=notes::$(echo ${{ github.event.pull_request.body }})" 
-
   # push to dockerhub
   deploy-release-dockerhub:
     needs: [ "generate-version", "prepare-release" ]
@@ -258,4 +252,4 @@ jobs:
           tag_name: ${{ needs.generate-version.outputs.version }}
           name: ${{ needs.generate-version.outputs.version }}
           prerelease: true
-          body: ${{ needs.prepare-release.outputs.notes }}
+          body: ${{ github.event.pull_request.body }}
