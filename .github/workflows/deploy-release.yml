@@ -9,7 +9,11 @@ env:
   IMAGE_ORG: fiware
   IMAGE_NAME: orion-ld
 
+concurrency: ci-${{ github.ref }}
+
 jobs:
+
+
   # generate version, based on the last pr
   generate-version:
 
@@ -139,14 +143,11 @@ jobs:
 
       - uses: actions/checkout@v2
 
-
       - name: get last pr
         id: pr
         uses: actions-ecosystem/action-get-merged-pull-request@v1.0.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-
-
 
       - name: read release notes
         id: release-notes
