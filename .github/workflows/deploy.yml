@@ -58,10 +58,10 @@ jobs:
           sed -i '/#define ORIONLD_VERSION/s/.*/#define ORIONLD_VERSION ${{ needs.generate-version.outputs.version }}/' orionldState.h
 
       - name: Commit & Push changes
-        uses: actions-js/push@master
+        uses: actions-js/push@v1.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.head_ref }}
+          branch: ${{ github.base_ref }}
 
 
   # push to dockerhub
