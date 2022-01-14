@@ -33,6 +33,7 @@ jobs:
         uses: rez0n/actions-github-release@v1.1
         with:
           type: stable
+          repository: ${{ github.repository }}
 
       - name: Set version output
         id: out
