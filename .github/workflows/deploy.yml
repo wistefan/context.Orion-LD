@@ -63,6 +63,7 @@ jobs:
         uses: actions-js/push@v1.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          force: true
           branch: ${{ github.event.pull_request.head.ref }}
 
 
