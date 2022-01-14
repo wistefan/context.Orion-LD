@@ -63,17 +63,7 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git commit -m "Update release version" -a
-
-      - uses: mdecoleman/pr-branch-name@1.0.1
-        id: branch
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ steps.branch.outputs.branch }}
+          git push
 
       - name: read release notes
         id: release-notes
