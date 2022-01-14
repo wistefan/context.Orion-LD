@@ -30,14 +30,14 @@ jobs:
 
       - name: Get latest Github release
         id: latest-release
-        uses: rez0n/actions-github-release@v1.1
+        uses: InsonusK/get-latest-release@v1.0.1
         with:
-          type: stable
-          repository: ${{ github.repository }}
+          myToken: ${{ secrets.GITHUB_TOKEN }}
+          exclude_types: draft|prerelease
 
       - name: Set version output
         id: out
-        run: echo "::set-output name=version::$(echo ${{ steps.latest-release.outputs.release }}-${{ env.IMAGE_TAG_PRE }})"
+        run: echo "::set-output name=version::$(echo ${{ steps.latest-release.outputs.tag_name }}-${{ env.IMAGE_TAG_PRE }})"
 
   prepare-release:
     needs: [ "generate-version" ]
