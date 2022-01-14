@@ -64,11 +64,12 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git commit -m "Update release version" -a
 
+
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.base_ref }}
+          branch: ${{ github.head_ref }}
 
       - name: read release notes
         id: release-notes
