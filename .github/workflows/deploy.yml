@@ -15,6 +15,8 @@ env:
   IMAGE_TAG_DEBUG: debug
   IMAGE_TAG_PRE: PRE-${{ github.run_number }}
 
+concurrency: ci-${{ github.ref }}
+
 jobs:
 
   # generate pre-release version, based on the last release
@@ -61,6 +63,7 @@ jobs:
         uses: actions-js/push@v1.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          force: true
           branch: ${{ github.event.pull_request.head.ref }}
 
 
