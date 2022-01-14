@@ -65,6 +65,7 @@ jobs:
         uses: actions-js/push@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
 
   deploy-release-quay:
     needs: [ "generate-version", "prepare-release" ]
