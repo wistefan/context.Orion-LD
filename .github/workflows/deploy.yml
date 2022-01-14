@@ -61,7 +61,7 @@ jobs:
         uses: actions-js/push@v1.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.base_ref }}
+          branch: ${{ github.event.pull_request.head.ref }}
 
 
   # push to dockerhub
