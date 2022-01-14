@@ -47,11 +47,8 @@ jobs:
       release-notes: ${{ steps.release-notes.outputs.notes }}
 
     steps:
-
       - uses: actions/checkout@v2
-        with:
-          persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal access token.
-          fetch-depth: 0 # otherwise, there would be errors pushing refs to the destination repository.
+
 
       - name: set version in header file
         run: |
@@ -60,7 +57,6 @@ jobs:
 
       - name: Commit files
         run: |
-          git pull
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git commit -m "Update release version" -a
