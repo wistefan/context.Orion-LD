@@ -67,7 +67,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
   deploy-release-quay:
-    needs: [ "generate-version", "prepare-release" ]
+    needs: [ "generate-version", "prepare-release" ] 
     runs-on: ubuntu-18.04
 
     steps:
