@@ -30,13 +30,14 @@ jobs:
 
       - name: Get latest Github release
         id: latest-release
-        uses: rez0n/actions-github-release@v1.1
+        uses: InsonusK/get-latest-release@v1.0.1
         with:
-          type: stable
+          myToken: ${{ secrets.GITHUB_TOKEN }}
+          exclude_types: draft|prerelease
 
       - name: Set version output
         id: out
-        run: echo "::set-output name=version::$(echo ${{ steps.latest-release.outputs.release }}-${{ env.IMAGE_TAG_PRE }})"
+        run: echo "::set-output name=version::$(echo ${{ steps.latest-release.outputs.tag_name }}-${{ env.IMAGE_TAG_PRE }})"
 
   prepare-release:
     needs: [ "generate-version" ]
@@ -63,17 +64,12 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git commit -m "Update release version" -a
 
+
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
-
-      - name: read release notes
-        id: release-notes
-        run: |
-          echo "Release notes are: ${{ steps.pr.outputs.body }}"
-          echo "::set-output name=notes::$(echo ${{ github.event.pull_request.body }})" 
+          branch: ${{ github.head_ref }} 
 
   # push to dockerhub
   deploy-release-dockerhub:
@@ -83,55 +79,55 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+#
+#      - name: Set up QEMU
+#        uses: docker/setup-qemu-action@v1
+#
+#      - name: Set up Docker Buildx
+#        uses: docker/setup-buildx-action@v1
+#
+#      - name: Login to DockerHub
+#        uses: docker/login-action@v1
+#        with:
+#          username: ${{ secrets.DOCKERHUB_USERNAME }}
+#          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+#      - name: Build and push
+#        id: docker_build
+#        uses: docker/build-push-action@v2
+#        with:
+#          push: true
+#          tags: |
+#            ${{ env.IMAGE_ORG }}/${{ env.IMAGE_NAME }}:${{ needs.generate-version.outputs.version }}
+#          file: docker/Dockerfile-ubi
+#          no-cache: true
+#
+#      - name: Build and push with gdb
+#        id: docker_build_gdb
+#        uses: docker/build-push-action@v2
+#        with:
+#          push: true
+#          tags: |
+#            ${{ env.IMAGE_ORG }}/${{ env.IMAGE_NAME }}:${{ needs.generate-version.outputs.version }}-GDB
+#          build-args: |
+#            BASE_VERSION=${{ needs.generate-version.outputs.version }}
+#          file: docker/Dockerfile-gdb
+#          no-cache: true
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build and push
-        id: docker_build
-        uses: docker/build-push-action@v2
-        with:
-          push: true
-          tags: |
-            ${{ env.IMAGE_ORG }}/${{ env.IMAGE_NAME }}:${{ needs.generate-version.outputs.version }}
-          file: docker/Dockerfile-ubi
-          no-cache: true
-
-      - name: Build and push with gdb
-        id: docker_build_gdb
-        uses: docker/build-push-action@v2
-        with:
-          push: true
-          tags: |
-            ${{ env.IMAGE_ORG }}/${{ env.IMAGE_NAME }}:${{ needs.generate-version.outputs.version }}-GDB
-          build-args: |
-            BASE_VERSION=${{ needs.generate-version.outputs.version }}
-          file: docker/Dockerfile-gdb
-          no-cache: true
-
-
-      - name: Run Snyk to check Docker image for vulnerabilities
-        uses: snyk/actions/docker@master
-        continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          image: ${{ env.IMAGE_ORG }}/${{ env.IMAGE_NAME }}:${{ needs.generate-version.outputs.version }}
-          args: --file=docker/Dockerfile-ubi
-
-      - name: Upload result to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v1
-        with:
-          sarif_file: snyk.sarif
+#
+#      - name: Run Snyk to check Docker image for vulnerabilities
+#        uses: snyk/actions/docker@master
+#        continue-on-error: true
+#        env:
+#          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+#        with:
+#          image: ${{ env.IMAGE_ORG }}/${{ env.IMAGE_NAME }}:${{ needs.generate-version.outputs.version }}
+#          args: --file=docker/Dockerfile-ubi
+#
+#      - name: Upload result to GitHub Code Scanning
+#        uses: github/codeql-action/upload-sarif@v1
+#        with:
+#          sarif_file: snyk.sarif
 
   deploy-debug-dockerhub:
     needs: [ "generate-version", "prepare-release" ]
@@ -140,27 +136,27 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+#
+#      - name: Set up QEMU
+#        uses: docker/setup-qemu-action@v1
+#
+#      - name: Set up Docker Buildx
+#        uses: docker/setup-buildx-action@v1
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build and push
-        id: docker_build
-        uses: docker/build-push-action@v2
-        with:
-          push: true
-          tags: ${{ env.IMAGE_ORG }}/${{ env.IMAGE_NAME }}:${{ needs.generate-version.outputs.version }}-${{ env.IMAGE_TAG_DEBUG }}
-          file: docker/Dockerfile-debug
-          no-cache: true
+#      - name: Login to DockerHub
+#        uses: docker/login-action@v1
+#        with:
+#          username: ${{ secrets.DOCKERHUB_USERNAME }}
+#          password: ${{ secrets.DOCKERHUB_TOKEN }}
+#
+#      - name: Build and push
+#        id: docker_build
+#        uses: docker/build-push-action@v2
+#        with:
+#          push: true
+#          tags: ${{ env.IMAGE_ORG }}/${{ env.IMAGE_NAME }}:${{ needs.generate-version.outputs.version }}-${{ env.IMAGE_TAG_DEBUG }}
+#          file: docker/Dockerfile-debug
+#          no-cache: true
 
   # quay.io
   deploy-release-quay:
@@ -171,47 +167,47 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Build Image
-        id: build-image
-        uses: redhat-actions/buildah-build@v2
-        with:
-          image: ${{ env.IMAGE_ORG }}/${{ env.IMAGE_NAME }}
-          oci: true
-          tags: ${{ needs.generate-version.outputs.version }} ${{ github.sha }}
-          dockerfiles: |
-            ./docker/Dockerfile-ubi
-
-      - name: Push To quay.io
-        id: push-to-quay
-        uses: redhat-actions/push-to-registry@v2
-        with:
-          image: ${{ steps.build-image.outputs.image }}
-          tags: ${{ steps.build-image.outputs.tags }}
-          registry: quay.io
-          username: ${{ secrets.QUAY_USERNAME }}
-          password: ${{ secrets.QUAY_PASSWORD }}
-
-      - name: Build with gdb
-        id: build-image-gdb
-        uses: redhat-actions/buildah-build@v2
-        with:
-          image: ${{ env.IMAGE_ORG }}/${{ env.IMAGE_NAME }}
-          tags: ${{ needs.generate-version.outputs.version }}-GDB
-          oci: true
-          dockerfiles: |
-            ./docker/Dockerfile-gdb
-          build-args: |
-            BASE_VERSION=${{ env.IMAGE_TAG_PRE }}
-
-      - name: Push To quay.io
-        id: push-gdb-to-quay
-        uses: redhat-actions/push-to-registry@v2
-        with:
-          image: ${{ steps.build-image-gdb.outputs.image }}
-          tags: ${{ steps.build-image-gdb.outputs.tags }}
-          registry: quay.io
-          username: ${{ secrets.QUAY_USERNAME }}
-          password: ${{ secrets.QUAY_PASSWORD }}
+#      - name: Build Image
+#        id: build-image
+#        uses: redhat-actions/buildah-build@v2
+#        with:
+#          image: ${{ env.IMAGE_ORG }}/${{ env.IMAGE_NAME }}
+#          oci: true
+#          tags: ${{ needs.generate-version.outputs.version }} ${{ github.sha }}
+#          dockerfiles: |
+#            ./docker/Dockerfile-ubi
+#
+#      - name: Push To quay.io
+#        id: push-to-quay
+#        uses: redhat-actions/push-to-registry@v2
+#        with:
+#          image: ${{ steps.build-image.outputs.image }}
+#          tags: ${{ steps.build-image.outputs.tags }}
+#          registry: quay.io
+#          username: ${{ secrets.QUAY_USERNAME }}
+#          password: ${{ secrets.QUAY_PASSWORD }}
+#
+#      - name: Build with gdb
+#        id: build-image-gdb
+#        uses: redhat-actions/buildah-build@v2
+#        with:
+#          image: ${{ env.IMAGE_ORG }}/${{ env.IMAGE_NAME }}
+#          tags: ${{ needs.generate-version.outputs.version }}-GDB
+#          oci: true
+#          dockerfiles: |
+#            ./docker/Dockerfile-gdb
+#          build-args: |
+#            BASE_VERSION=${{ env.IMAGE_TAG_PRE }}
+#
+#      - name: Push To quay.io
+#        id: push-gdb-to-quay
+#        uses: redhat-actions/push-to-registry@v2
+#        with:
+#          image: ${{ steps.build-image-gdb.outputs.image }}
+#          tags: ${{ steps.build-image-gdb.outputs.tags }}
+#          registry: quay.io
+#          username: ${{ secrets.QUAY_USERNAME }}
+#          password: ${{ secrets.QUAY_PASSWORD }}
 
 
   deploy-debug-quay:
@@ -222,25 +218,25 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Build Image
-        id: build-image
-        uses: redhat-actions/buildah-build@v2
-        with:
-          image: ${{ env.IMAGE_ORG }}/${{ env.IMAGE_NAME }}
-          tags: ${{ needs.generate-version.outputs.version }}-${{ env.IMAGE_TAG_DEBUG }}
-          oci: true
-          dockerfiles: |
-            ./docker/Dockerfile-debug
-
-      - name: Push To quay.io
-        id: push-debug-to-quay
-        uses: redhat-actions/push-to-registry@v2
-        with:
-          image: ${{ steps.build-image.outputs.image }}
-          tags: ${{ steps.build-image.outputs.tags }}
-          registry: quay.io
-          username: ${{ secrets.QUAY_USERNAME }}
-          password: ${{ secrets.QUAY_PASSWORD }}
+#      - name: Build Image
+#        id: build-image
+#        uses: redhat-actions/buildah-build@v2
+#        with:
+#          image: ${{ env.IMAGE_ORG }}/${{ env.IMAGE_NAME }}
+#          tags: ${{ needs.generate-version.outputs.version }}-${{ env.IMAGE_TAG_DEBUG }}
+#          oci: true
+#          dockerfiles: |
+#            ./docker/Dockerfile-debug
+#
+#      - name: Push To quay.io
+#        id: push-debug-to-quay
+#        uses: redhat-actions/push-to-registry@v2
+#        with:
+#          image: ${{ steps.build-image.outputs.image }}
+#          tags: ${{ steps.build-image.outputs.tags }}
+#          registry: quay.io
+#          username: ${{ secrets.QUAY_USERNAME }}
+#          password: ${{ secrets.QUAY_PASSWORD }}
 
 
   github-pre-release:
@@ -256,4 +252,4 @@ jobs:
           tag_name: ${{ needs.generate-version.outputs.version }}
           name: ${{ needs.generate-version.outputs.version }}
           prerelease: true
-          body: ${{ needs.prepare-release.outputs.notes }}
+          body: ${{ github.event.pull_request.body }}
