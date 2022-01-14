@@ -16,8 +16,7 @@ jobs:
   # generate version, based on the last pr
   generate-version:
 
-    if: >-
-      github.event.push.user.name != '${{ env.GITHUB_ACTIONS_BOT_NAME }}'
+    if: github.event.push.user.name != '${{ env.GITHUB_ACTIONS_BOT_NAME }}'
 
     runs-on: ubuntu-latest
     outputs:

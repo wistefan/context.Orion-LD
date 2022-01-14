@@ -22,8 +22,7 @@ jobs:
   # generate pre-release version, based on the last release
   generate-version:
 
-    if: >-
-      github.event.pull_request.user.name != '${{ env.GITHUB_ACTIONS_BOT_NAME }}'
+    if: github.event.pull_request.user.name != '${{ env.GITHUB_ACTIONS_BOT_NAME }}'
 
     runs-on: ubuntu-latest
     outputs:
