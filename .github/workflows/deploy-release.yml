@@ -3,70 +3,103 @@ name: Deploy Releases
 on:
   push:
     branches:
-      -  'release/**'
+      -  'releases'
 
 env:
   IMAGE_ORG: fiware
   IMAGE_NAME: orion-ld
+  GITHUB_ACTIONS_BOT_EMAIL: github-actions[bot]@users.noreply.github.com
+  GITHUB_ACTIONS_BOT_NAME: github-actions[bot]
+
 
 jobs:
+  # generate version, based on the last pr
+  generate-version:
 
-  deploy-release-redhat:
-    runs-on: ubuntu-20.04
-    if: github.event_name == 'push'
+    if: >-
+      github.event.push.user.name != '${{ env.GITHUB_ACTIONS_BOT_NAME }}'
 
-    steps:
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
-
-      - uses: jungwinter/split@v1
-        id: split
-        with:
-          msg: ${{ steps.extract_branch.outputs.branch }}
-          seperator: /
-
-      - name: Build image
-        uses: redhat-actions/buildah-build@v2
-        id: build-image
-        with:
-          image: ${{ env.IMAGE_NAME }}
-          tags: ${{ steps.split.outputs._1 }}
-          containerfiles: |
-            ./docker/Dockerfile-ubi
-
-      - name: Push To certification registry
-        id: push-to-cert
-        run: |
-          podman tag ${{ env.IMAGE_NAME }}:${{ steps.split.outputs._1 }} scan.connect.redhat.com/ospid-61aa0f57e87c1ebf3e3a4d15/${{ env.IMAGE_NAME }}:${{ steps.split.outputs._1 }}
-          podman push scan.connect.redhat.com/ospid-61aa0f57e87c1ebf3e3a4d15/${{ env.IMAGE_NAME }}:${{ steps.split.outputs._1 }}
-
-
-  deploy-release-quay:
-    runs-on: ubuntu-18.04
-    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.out.outputs.version }}
 
     steps:
+
       - uses: actions/checkout@v2
 
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
-
-      - uses: jungwinter/split@v1
-        id: split
+      - id: pr
+        uses: actions-ecosystem/action-get-merged-pull-request@v1.0.1
         with:
-          msg: ${{ steps.extract_branch.outputs.branch }}
-          seperator: /
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: zwaldowski/semver-release-action@v2
+        with:
+          dry_run: true
+          bump: ${{ steps.pr.outputs.labels }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set version output
+        id: out
+        run: echo "::set-output name=version::$(echo ${VERSION})"
+
+  prepare-release:
+    needs: [ "generate-version" ]
+    runs-on: ubuntu-18.04
+
+    outputs:
+      release-notes: ${{ steps.release-notes.outputs.notes }}
+
+    steps:
+
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal access token.
+          fetch-depth: 0 # otherwise, there would be errors pushing refs to the destination repository.
+
+      - name: set version in header file
+        run: |
+          cd src/lib/orionld/common/
+          sed -i '/#define ORIONLD_VERSION/s/.*/#define ORIONLD_VERSION ${{ needs.generate-version.outputs.version }}/' orionldState.h
+
+
+      - name: get last pr
+        id: pr
+        uses: actions-ecosystem/action-get-merged-pull-request@v1.0.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit files
+        run: |
+          git config --local user.email "${{ env.GITHUB_ACTIONS_BOT_EMAIL }}"
+          git config --local user.name "${{ env.GITHUB_ACTIONS_BOT_NAME }}"
+          git commit -m "Update release version" -a
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+
+      - name: read release notes
+        id: release-notes
+        run: |
+          echo "Release notes are: ${{ steps.pr.outputs.body }}"
+          echo "::set-output name=notes::$(echo ${{ steps.pr.outputs.body }})" 
+
+  deploy-release-quay:
+    needs: [ "generate-version", "prepare-release" ]
+    runs-on: ubuntu-18.04
+
+    steps:
+
+      - uses: actions/checkout@v2
 
       - name: Build Image
         id: build-image
         uses: redhat-actions/buildah-build@v2
         with:
           image: ${{ env.IMAGE_ORG }}/${{ env.IMAGE_NAME }}
-          tags: ${{ steps.split.outputs._1 }} ${{ github.sha }}
+          tags: ${{ needs.generate-version.outputs.version }} ${{ github.sha }}
           dockerfiles: |
             ./docker/Dockerfile-ubi
 
@@ -81,23 +114,11 @@ jobs:
           password: ${{ secrets.QUAY_PASSWORD }}
 
   deploy-release-dockerhub:
-
+    needs: [ "generate-version", "prepare-release" ]
     runs-on: ubuntu-18.04
-    if: github.event_name == 'push'
 
     steps:
       - uses: actions/checkout@v2
-
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
-
-      - uses: jungwinter/split@v1
-        id: split
-        with:
-          msg: ${{ steps.extract_branch.outputs.branch }}
-          seperator: /
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -117,13 +138,34 @@ jobs:
         with:
           push: true
           tags: |
-            ${{ env.IMAGE_ORG }}/${{ env.IMAGE_NAME }}:${{ steps.split.outputs._1 }}
+            ${{ env.IMAGE_ORG }}/${{ env.IMAGE_NAME }}:${{ needs.generate-version.outputs.version }}
           file: docker/Dockerfile-ubi
           no-cache: true
 
-      - name: Deploy new global instance based on the new release
+
+  deploy-to-global-instance:
+    needs: [ "deploy-release-dockerhub" ]
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: Deploy
         uses: fjogeleit/http-request-action@master
         with:
           url: ${{ secrets.CD_URL_TRIGGER }}
           method: 'GET'
           bearerToken: ${{ secrets.CD_TOKEN }}
+
+  github-release:
+    needs: [ "generate-version", "prepare-release", "deploy-release-dockerhub", "deploy-release-quay"]
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - uses: actions/checkout@v2
+
+      - uses: "softprops/action-gh-release@v0.1.14"
+        with:
+          tag_name: ${{ needs.generate-version.outputs.version }}
+          name: ${{ needs.generate-version.outputs.version }}
+          prerelease: false
+          body: ${{ needs.prepare-release.outputs.notes }}
